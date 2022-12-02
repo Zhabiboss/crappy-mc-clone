@@ -9,31 +9,13 @@ display = pygame.display
 screen = display.set_mode(res)
 clock = pygame.time.Clock()
 fps = 60
-
-def roundnumber(n, n2):
-	if n < n2 / 2: return 0
-	else: return n2
 	
 
 class Wall:
 	def __init__(self, x, y, width, height):
 		self.x, self.y, self.width, self.height = x, y, width, height
-		if self.x < 1: self.x = 0
-		elif self.x == 60: self.x = 60
-		elif self.x > 60: 
-			tmp = self.x // 60
-			remainder = self.x - tmp * 60
-			tmp1 = self.x - remainder
-			remainder = roundnumber(remainder, 60)
-			self.x = tmp1 + remainder
-		if self.y < 1: self.y = 0
-		elif self.y == 60: self.y = 60
-		elif self.y > 60: 
-			tmp = self.y // 60
-			remainder = self.y - tmp * 60
-			tmp1 = self.y - remainder
-			remainder = roundnumber(remainder, 60)
-			self.y = tmp1 + remainder
+		self.x = self.x - (self.x % 60)
+		self.y = self.y - (self.y % 60)
 		self.x, self.y = int(self.x), int(self.y)
 
 	def update(self): ...
@@ -66,7 +48,7 @@ class Background:
 
 
 
-walls = [TexturedBlock(0, 0), TexturedBlock(width - 150, height - 150)]
+walls = []
 
 
 
@@ -77,6 +59,7 @@ class Player:
 		self.y = height // 2
 		self.speed = 4
 		self.dx, self.dy = 0, 0
+		
 		self.player_up_1 = pygame.image.load("Resources/boy_up_1.png")
 		self.player_up_1 = pygame.transform.scale(self.player_up_1, (60, 60))
 		self.player_up_2 = pygame.image.load("Resources/boy_up_2.png")
@@ -93,9 +76,11 @@ class Player:
 		self.player_right_1 = pygame.transform.scale(self.player_right_1, (60, 60))
 		self.player_right_2 = pygame.image.load("Resources/boy_right_2.png")
 		self.player_right_2 = pygame.transform.scale(self.player_right_2, (60, 60))
+
 		self.frame = 1
 		self.framecounter = 0
 		self.lastdrawn = None
+		self.clicked = False
 
 	def move(self):
 		self.dx, self.dy = 0, 0
@@ -156,6 +141,31 @@ class Player:
 		self.y += self.dy
 
 
+	def mousehandler(self):
+		for i in pygame.event.get():
+			if i.type == pygame.MOUSEBUTTONDOWN and self.clicked == False:
+				self.clicked = True
+
+				mouse = pygame.mouse.get_pressed()
+				if mouse[2]:
+					wall = TexturedBlock(*pygame.mouse.get_pos())
+					walls.append(wall)
+					#print(walls)
+					
+				elif mouse[0]:
+					for wall in walls:
+						if wall.x == pygame.mouse.get_pos()[0] - (pygame.mouse.get_pos()[0] % 60) and wall.y == pygame.mouse.get_pos()[1] - (pygame.mouse.get_pos()[1] % 60):
+							walls.remove(wall)
+							break
+			
+			if i.type == pygame.MOUSEBUTTONUP:
+				self.clicked = False
+
+			if i.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+
+
 	def draw(self):
 		if self.framecounter >= 15:
 			if self.frame == 1: self.frame = 2
@@ -197,13 +207,16 @@ class Player:
 			else:
 				screen.blit(self.player_up_1, (self.x - 30, self.y - 30, 60, 60))
 
+		font = pygame.font.Font("freesansbold.ttf", 16)
+		text = font.render(self.tag, True, "black")
+		rect = text.get_rect()
+		screen.blit(text, (self.x - rect.width // 2, self.y - 40 - rect.height))
+
 		self.framecounter += 1
 
 	def update(self):
 		self.move()
-
-	def __repr__(self):
-		return (self.tag, (self.x, self.y))
+		self.mousehandler()
 
 
 
