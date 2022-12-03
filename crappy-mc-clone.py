@@ -2,6 +2,29 @@ import pygame
 import sys
 import random
 from network import Network
+from tkinter import *
+
+username_ = ""
+
+root = Tk()
+root.title("Username")
+root.resizable(width = False, height = False)
+root["bg"] = "white"
+
+def username():
+	global username_
+	if ent.get() != "":
+		username_ = ent.get()
+		root.destroy()
+
+lbl = Label(root, text = "Username", bg = "white", font = ("Arial", 18))
+ent = Entry(root, font = ("Arial", 18))
+lbl.grid(column = 0, row = 0)
+ent.grid(column = 1, row = 0)
+btn = Button(root, text = "Enter", font = ("Arial", 18), command = username)
+btn.grid(column = 0, row = 1)
+
+root.mainloop()
 
 pygame.init()
 
@@ -10,7 +33,6 @@ display = pygame.display
 screen = display.set_mode(res)
 clock = pygame.time.Clock()
 fps = 60
-clientNumber = 0
 
 
 class Wall:
@@ -208,7 +230,7 @@ class Player:
 			if self.lastdrawn != None:
 				screen.blit(self.lastdrawn, (self.x - 30, self.y - 30, 60, 60))
 			else:
-				screen.blit(self.player_up_1, (self.x - 30, self.y - 30, 60, 60))
+				screen.blit(self.player_down_1, (self.x - 30, self.y - 30, 60, 60))
 
 		font = pygame.font.Font("freesansbold.ttf", 16)
 		text = font.render(self.tag, True, "black")
@@ -233,8 +255,8 @@ def make_pos(tup):
 n = Network()
 startpos = read_pos(n.get_pos())
 
-player = Player(x = startpos[0], y = startpos[1], main = True, tag = "Player 1")
-player2 = Player(x = startpos[0], y = startpos[1], tag = "Player 2")
+player = Player(x = startpos[0], y = startpos[1], main = True, tag = username_)
+player2 = Player(x = startpos[0], y = startpos[1])
 background = Background()
 
 def update():
