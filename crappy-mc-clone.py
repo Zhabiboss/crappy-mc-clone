@@ -3,6 +3,7 @@ import sys
 import random
 from network import Network
 from tkinter import *
+import json
 
 username_ = ""
 
@@ -53,6 +54,7 @@ class TexturedBlock(Wall):
 		super().__init__(x, y, 60, 60)
 		self.image = pygame.image.load(texture)
 		self.image = pygame.transform.scale(self.image, (60, 60))
+		self.texture = texture
 
 	def draw(self):
 		screen.blit(self.image, (self.x, self.y))
@@ -274,9 +276,21 @@ def draw():
 		for wall in walls:
 			wall.draw()
 
+def send_walls():
+	global walls
+	newlst = []
+	for el in walls:
+		newlst.append((el.x, el.y, el.texture))
+	recvwalls = json.loads(n.send(json.dumps(newlst)))
+	newlst_ = []
+	for el in recvwalls:
+		newlst_.append(TexturedBlock(int(el[0]), int(el[1]), texture = str(el[2])))
+	walls = newlst_
+
 while True:
 	player2pos = read_pos(n.send(make_pos((player.x, player.y, player.dx, player.dy, player.tag))))
 	player2.x, player2.y, player2.dx, player2.dy, player2.tag = player2pos
+	send_walls()
 
 	screen.fill((0, 0, 0))
 	update()

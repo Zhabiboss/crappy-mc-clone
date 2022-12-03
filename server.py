@@ -1,6 +1,7 @@
 import socket
 from _thread import start_new_thread
 import sys
+import json 
 
 def read_pos(string):
 	string = string.split(",")
@@ -41,6 +42,23 @@ def threaded_client(conn, currentplayer):
                 print(f"Sending: {reply}")
             
             conn.sendall(str.encode(make_pos(reply)))
+
+        except:
+            print("Failed to recieve data")
+            break
+
+        try:
+            data = conn.recv(2048).decode()
+
+            if not data:
+                print("Disconnected")
+                break
+            else:
+                reply = data
+                print(f"Recieved: {data}")
+                print(f"Sending: {reply}")
+            
+            conn.sendall(str.encode(reply))
 
         except:
             print("Failed to recieve data")
